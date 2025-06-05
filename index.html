@@ -104,17 +104,17 @@
                 return;
             }
             
-            // استبدل هذه القيم بمعلومات بوتك وقناتك
+            // استبدل هذه القيم بمعلومات بوتك وقناتك الخاصة
             const botToken = 'YOUR_BOT_TOKEN';
-            const chatId1 = '@YOUR_FIRST_CHANNEL';
-            const chatId2 = '@YOUR_SECOND_CHANNEL';
+            const privateChatId1 = '-1001234567890'; // معرف القناة الخاصة الأولى (يجب أن يبدأ بـ -100)
+            const privateChatId2 = '-1009876543210'; // معرف القناة الخاصة الثانية
             
             const message = `📚 سؤال جديد في مادة ${subjectText}:\n\n${question}`;
             const encodedMessage = encodeURIComponent(message);
             
             // رابط API Telegram لإرسال الرسائل
-            const url1 = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId1}&text=${encodedMessage}`;
-            const url2 = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId2}&text=${encodedMessage}`;
+            const url1 = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${privateChatId1}&text=${encodedMessage}`;
+            const url2 = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${privateChatId2}&text=${encodedMessage}`;
             
             document.getElementById('status').textContent = 'جاري الإرسال...';
             document.getElementById('status').style.color = '#3498db';
