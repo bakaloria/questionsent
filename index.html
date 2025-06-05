@@ -32,7 +32,7 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
-        select, textarea {
+        select, textarea, input[type="file"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -63,6 +63,37 @@
             color: #27ae60;
             font-weight: bold;
         }
+        #imagePreview {
+            max-width: 100%;
+            margin-top: 10px;
+            display: none;
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        .file-input-button {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .file-input-button:hover {
+            background-color: #e0e0e0;
+        }
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -76,6 +107,7 @@
                 <option value="science">العلوم</option>
                 <option value="physics">الفيزياء</option>
                 <option value="chemistry">الكيمياء</option>
+                <option value="biology">الأحياء</option>
                 <option value="arabic">اللغة العربية</option>
                 <option value="english">اللغة الإنجليزية</option>
             </select>
@@ -86,16 +118,43 @@
             <textarea id="question" placeholder="اكتب سؤالك هنا..."></textarea>
         </div>
         
-        <button onclick="sendToTelegram()">إرسال</button>
+        <div class="form-group">
+            <label>إضافة صورة (اختياري):</label>
+            <div class="file-input-wrapper">
+                <div class="file-input-button" id="fileInputLabel">
+                    انقر لاختيار صورة أو اسحبها هنا
+                </div>
+                <input type="file" id="imageUpload" accept="image/*">
+            </div>
+            <img id="imagePreview" alt="معاينة الصورة">
+        </div>
+        
+        <button onclick="sendToTelegram()">إرسال إلى Telegram</button>
         
         <div id="status"></div>
     </div>
 
     <script>
-        function sendToTelegram() {
+        // معاينة الصورة قبل التحميل
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = event.target.result;
+                    preview.style.display = 'block';
+                    document.getElementById('fileInputLabel').textContent = 'تم اختيار الصورة: ' + file.name;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function sendToTelegram() {
             const subject = document.getElementById('subject').value;
             const subjectText = document.getElementById('subject').options[document.getElementById('subject').selectedIndex].text;
             const question = document.getElementById('question').value;
+            const imageFile = document.getElementById('imageUpload').files[0];
             
             if (!question.trim()) {
                 document.getElementById('status').textContent = 'الرجاء كتابة السؤال أولاً';
@@ -105,52 +164,99 @@
             
             // استبدل هذه القيم بمعلومات بوتك وقناتك الخاصة
             const botToken = '7614296494:AAFnvemr8G4sPvRJn6Vmvl1XCaF-JF4U5oE';
-            const privateChatId1 = '-1001708556002'; // معرف القناة الخاصة الأولى (يجب أن يبدأ بـ -100)
+            const privateChatId1 = '-1001708556002'; // معرف القناة الخاصة الأولى
             const privateChatId2 = '-1001709663865'; // معرف القناة الخاصة الثانية
             
-            const message = `📚مادة  ${subjectText}:\n\n${question}`;
-            const encodedMessage = encodeURIComponent(message);
-            
-            // رابط API Telegram لإرسال الرسائل
-            const url1 = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${privateChatId1}&text=${encodedMessage}`;
-            const url2 = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${privateChatId2}&text=${encodedMessage}`;
+            const message = `📚 ${subjectText}:\n\n${question}`;
             
             document.getElementById('status').textContent = 'جاري الإرسال...';
             document.getElementById('status').style.color = '#3498db';
             
-            // إرسال إلى القناة الأولى
-            fetch(url1)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.ok) {
-                        // إرسال إلى القناة الثانية
-                        fetch(url2)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.ok) {
-                                    document.getElementById('status').textContent = 'تم الإرسال بنجاح إلى القناتين!';
-                                    document.getElementById('status').style.color = '#27ae60';
-                                    document.getElementById('question').value = '';
-                                } else {
-                                    document.getElementById('status').textContent = 'تم الإرسال إلى القناة الأولى فقط!';
-                                    document.getElementById('status').style.color = '#e67e22';
-                                }
-                            })
-                            .catch(error => {
-                                document.getElementById('status').textContent = 'تم الإرسال إلى القناة الأولى فقط!';
-                                document.getElementById('status').style.color = '#e67e22';
-                                console.error('Error:', error);
-                            });
+            try {
+                // إذا كان هناك صورة مرفقة
+                if (imageFile) {
+                    const formData = new FormData();
+                    formData.append('chat_id', privateChatId1);
+                    formData.append('photo', imageFile);
+                    formData.append('caption', message);
+                    
+                    // إرسال الصورة إلى القناة الأولى
+                    const response1 = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data1 = await response1.json();
+                    
+                    if (data1.ok) {
+                        // إرسال الصورة إلى القناة الثانية
+                        formData.set('chat_id', privateChatId2);
+                        const response2 = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const data2 = await response2.json();
+                        
+                        if (data2.ok) {
+                            showSuccess('تم الإرسال بنجاح إلى القناتين مع الصورة!');
+                        } else {
+                            showPartialSuccess('تم الإرسال إلى القناة الأولى فقط مع الصورة!');
+                        }
                     } else {
-                        document.getElementById('status').textContent = 'فشل في الإرسال!';
-                        document.getElementById('status').style.color = '#e74c3c';
+                        showError('فشل في إرسال الصورة!');
                     }
-                })
-                .catch(error => {
-                    document.getElementById('status').textContent = 'حدث خطأ أثناء الإرسال!';
-                    document.getElementById('status').style.color = '#e74c3c';
-                    console.error('Error:', error);
-                });
+                } else {
+                    // إذا لم يكن هناك صورة مرفقة
+                    const encodedMessage = encodeURIComponent(message);
+                    const url1 = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${privateChatId1}&text=${encodedMessage}`;
+                    const url2 = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${privateChatId2}&text=${encodedMessage}`;
+                    
+                    // إرسال الرسالة النصية إلى القناة الأولى
+                    const response1 = await fetch(url1);
+                    const data1 = await response1.json();
+                    
+                    if (data1.ok) {
+                        // إرسال الرسالة النصية إلى القناة الثانية
+                        const response2 = await fetch(url2);
+                        const data2 = await response2.json();
+                        
+                        if (data2.ok) {
+                            showSuccess('تم الإرسال بنجاح إلى القناتين!');
+                        } else {
+                            showPartialSuccess('تم الإرسال إلى القناة الأولى فقط!');
+                        }
+                    } else {
+                        showError('فشل في الإرسال!');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('حدث خطأ أثناء الإرسال!');
+            }
+        }
+        
+        function showSuccess(message) {
+            document.getElementById('status').textContent = message;
+            document.getElementById('status').style.color = '#27ae60';
+            document.getElementById('question').value = '';
+            document.getElementById('imageUpload').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('fileInputLabel').textContent = 'انقر لاختيار صورة أو اسحبها هنا';
+        }
+        
+        function showPartialSuccess(message) {
+            document.getElementById('status').textContent = message;
+            document.getElementById('status').style.color = '#e67e22';
+            document.getElementById('question').value = '';
+            document.getElementById('imageUpload').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('fileInputLabel').textContent = 'انقر لاختيار صورة أو اسحبها هنا';
+        }
+        
+        function showError(message) {
+            document.getElementById('status').textContent = message;
+            document.getElementById('status').style.color = '#e74c3c';
         }
     </script>
 </body>
