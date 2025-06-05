@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الأسئلة التعليمية</title>
+    <title>أسئلة متابعة الطلاب</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -67,7 +67,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>نظام إرسال الأسئلة التعليمية</h1>
+        <h1>إرسال أسئلة المتابعة للطلاب</h1>
         
         <div class="form-group">
             <label for="subject">اختر المادة:</label>
@@ -105,11 +105,11 @@
             }
             
             // استبدل هذه القيم بمعلومات بوتك وقناتك الخاصة
-            const botToken = 'YOUR_BOT_TOKEN';
-            const privateChatId1 = '-1001234567890'; // معرف القناة الخاصة الأولى (يجب أن يبدأ بـ -100)
-            const privateChatId2 = '-1009876543210'; // معرف القناة الخاصة الثانية
+            const botToken = '7614296494:AAFnvemr8G4sPvRJn6Vmvl1XCaF-JF4U5oE';
+            const privateChatId1 = '-1001708556002'; // معرف القناة الخاصة الأولى (يجب أن يبدأ بـ -100)
+            const privateChatId2 = '-1001709663865'; // معرف القناة الخاصة الثانية
             
-            const message = `📚 سؤال جديد في مادة ${subjectText}:\n\n${question}`;
+            const message = `📚 ${subjectText}:\n\n${question}`;
             const encodedMessage = encodeURIComponent(message);
             
             // رابط API Telegram لإرسال الرسائل
