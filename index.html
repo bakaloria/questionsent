@@ -129,7 +129,7 @@
             <img id="imagePreview" alt="معاينة الصورة">
         </div>
         
-        <button onclick="sendToTelegram()">إرسال إلى Telegram</button>
+        <button onclick="sendToTelegram()">إرسال</button>
         
         <div id="status"></div>
     </div>
@@ -167,7 +167,7 @@
             const privateChatId1 = '-1001708556002'; // معرف القناة الخاصة الأولى
             const privateChatId2 = '-1001709663865'; // معرف القناة الخاصة الثانية
             
-            const message = `📚 ${subjectText}:\n\n${question}`;
+            const message = `📚 مادة ${subjectText}:\n\n${question}`;
             
             document.getElementById('status').textContent = 'جاري الإرسال...';
             document.getElementById('status').style.color = '#3498db';
