@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الأسئلة التعليمية</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            text-align: right;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        button {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto 0;
+        }
+        button:hover {
+            background-color: #006699;
+        }
+        #status {
+            text-align: center;
+            margin-top: 15px;
+            color: #27ae60;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>نظام إرسال الأسئلة التعليمية</h1>
+        
+        <div class="form-group">
+            <label for="subject">اختر المادة:</label>
+            <select id="subject">
+                <option value="math">الرياضيات</option>
+                <option value="science">العلوم</option>
+                <option value="physics">الفيزياء</option>
+                <option value="chemistry">الكيمياء</option>
+                <option value="biology">الأحياء</option>
+                <option value="arabic">اللغة العربية</option>
+                <option value="english">اللغة الإنجليزية</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="question">اكتب سؤالك:</label>
+            <textarea id="question" placeholder="اكتب سؤالك هنا..."></textarea>
+        </div>
+        
+        <button onclick="sendToTelegram()">إرسال إلى Telegram</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        function sendToTelegram() {
+            const subject = document.getElementById('subject').value;
+            const subjectText = document.getElementById('subject').options[document.getElementById('subject').selectedIndex].text;
+            const question = document.getElementById('question').value;
+            
+            if (!question.trim()) {
+                document.getElementById('status').textContent = 'الرجاء كتابة السؤال أولاً';
+                document.getElementById('status').style.color = '#e74c3c';
+                return;
+            }
+            
+            // استبدل هذه القيم بمعلومات بوتك وقناتك
+            const botToken = 'YOUR_BOT_TOKEN';
+            const chatId1 = '@YOUR_FIRST_CHANNEL';
+            const chatId2 = '@YOUR_SECOND_CHANNEL';
+            
+            const message = `📚 سؤال جديد في مادة ${subjectText}:\n\n${question}`;
+            const encodedMessage = encodeURIComponent(message);
+            
+            // رابط API Telegram لإرسال الرسائل
+            const url1 = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId1}&text=${encodedMessage}`;
+            const url2 = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId2}&text=${encodedMessage}`;
+            
+            document.getElementById('status').textContent = 'جاري الإرسال...';
+            document.getElementById('status').style.color = '#3498db';
+            
+            // إرسال إلى القناة الأولى
+            fetch(url1)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                        // إرسال إلى القناة الثانية
+                        fetch(url2)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.ok) {
+                                    document.getElementById('status').textContent = 'تم الإرسال بنجاح إلى القناتين!';
+                                    document.getElementById('status').style.color = '#27ae60';
+                                    document.getElementById('question').value = '';
+                                } else {
+                                    document.getElementById('status').textContent = 'تم الإرسال إلى القناة الأولى فقط!';
+                                    document.getElementById('status').style.color = '#e67e22';
+                                }
+                            })
+                            .catch(error => {
+                                document.getElementById('status').textContent = 'تم الإرسال إلى القناة الأولى فقط!';
+                                document.getElementById('status').style.color = '#e67e22';
+                                console.error('Error:', error);
+                            });
+                    } else {
+                        document.getElementById('status').textContent = 'فشل في الإرسال!';
+                        document.getElementById('status').style.color = '#e74c3c';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('status').textContent = 'حدث خطأ أثناء الإرسال!';
+                    document.getElementById('status').style.color = '#e74c3c';
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+</body>
+</html>
