@@ -76,7 +76,6 @@
                 <option value="science">العلوم</option>
                 <option value="physics">الفيزياء</option>
                 <option value="chemistry">الكيمياء</option>
-                <option value="biology">الأحياء</option>
                 <option value="arabic">اللغة العربية</option>
                 <option value="english">اللغة الإنجليزية</option>
             </select>
@@ -87,7 +86,7 @@
             <textarea id="question" placeholder="اكتب سؤالك هنا..."></textarea>
         </div>
         
-        <button onclick="sendToTelegram()">إرسال إلى Telegram</button>
+        <button onclick="sendToTelegram()">إرسال</button>
         
         <div id="status"></div>
     </div>
@@ -109,7 +108,7 @@
             const privateChatId1 = '-1001708556002'; // معرف القناة الخاصة الأولى (يجب أن يبدأ بـ -100)
             const privateChatId2 = '-1001709663865'; // معرف القناة الخاصة الثانية
             
-            const message = `📚 ${subjectText}:\n\n${question}`;
+            const message = `📚مادة  ${subjectText}:\n\n${question}`;
             const encodedMessage = encodeURIComponent(message);
             
             // رابط API Telegram لإرسال الرسائل
